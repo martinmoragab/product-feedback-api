@@ -50,6 +50,6 @@ const feedbackSchema = new Schema({
   }],
 }, { timestamps: true });
 
-const Feedback = mongoose.Model('Feedback', feedbackSchema);
+const Feedback = mongoose.model('Feedback', feedbackSchema);
 
 module.exports = Feedback;
