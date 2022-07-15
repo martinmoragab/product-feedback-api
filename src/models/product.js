@@ -9,7 +9,12 @@ const productSchema = new Schema({
     required: [true, 'Product\'s name is required'],
     trim: true,
   },
-  owners: [{
+  owner: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
+  },
+  admins: [{
     type: Schema.Types.ObjectId,
     required: true,
     ref: 'User',
@@ -28,6 +33,6 @@ productSchema.pre('remove', async function (next) {
   next();
 });
 
-const Product = mongoose.Model('Product', productSchema);
+const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;
