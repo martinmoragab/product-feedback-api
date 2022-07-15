@@ -9,7 +9,12 @@ const productSchema = new Schema({
     required: [true, 'Product\'s name is required'],
     trim: true,
   },
-  owners: [{
+  owner: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
+  },
+  admins: [{
     type: Schema.Types.ObjectId,
     required: true,
     ref: 'User',
