@@ -7,6 +7,11 @@ const commentSchema = new Schema({
     required: true,
     trim: true,
   },
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   date: {
     type: Date,
     default: Date.now,
