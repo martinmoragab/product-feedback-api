@@ -14,11 +14,6 @@ const productSchema = new Schema({
     required: true,
     ref: 'User',
   },
-  admins: [{
-    type: Schema.Types.ObjectId,
-    required: true,
-    ref: 'User',
-  }],
   feedbacks: [{
     type: Schema.Types.ObjectId,
     required: true,
