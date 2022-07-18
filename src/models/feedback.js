@@ -7,6 +7,11 @@ const commentSchema = new Schema({
     required: true,
     trim: true,
   },
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   date: {
     type: Date,
     default: Date.now,
@@ -49,6 +54,17 @@ const feedbackSchema = new Schema({
     type: commentSchema,
   }],
 }, { timestamps: true });
+
+feedbackSchema.statics.canUpdate = async (feedbackId, updates, userId) => {
+  const feedback = await Feedback.findById(feedbackId).populate('product');
+  const product = feedback.product;
+  // User is not owner so cannot update the status
+  if (updates.includes('status') && product.owner.toString() !== userId.toString()) throw new Error('Need higher privileges.');
+  // User trying to update is not author
+  if (feedback.author.toString() !== userId.toString()) throw new Error('User is not feedback\'s author.');
+
+  return feedback;
+}
 
 const Feedback = mongoose.model('Feedback', feedbackSchema);
 
