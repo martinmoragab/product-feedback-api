@@ -11,7 +11,7 @@ router.post('/signup', async (req, res) => {
   try {
     const user = await User.create(userParams);
     const token = await user.generateAuthToken();
-    res.status(201).send({ data: { user, token } });
+    res.status(201).send({ user, token });
   } catch (e) {
     res.status(400).send(e);
   }
@@ -25,7 +25,7 @@ router.post('/login', async (req, res) => {
   try {
     const user = await User.findByCredentials(email, password);
     const token = await user.generateAuthToken();
-    res.send({ data: { user, token } });
+    res.send({ user, token });
   } catch (e) {
     res.status(400).send(e);
   }
@@ -55,7 +55,7 @@ router.post('/logoutAll', auth, async (req, res, next) => {
 
 // Get user
 router.get('/me', auth, async (req, res, next) => {
-  res.send({ data: { user: req.user }});
+  res.send({ user: req.user });
 })
 
 // Update user by id
@@ -75,7 +75,7 @@ router.patch('/me', auth, async (req, res, next) => {
 router.delete('/me', auth, async (req, res, next) => {
   try {
     await req.user.remove();
-    res.send({ data: { user: req.user }});
+    res.send({ user: req.user });
   } catch (e) {
     res.status(404).send(e);
   }
