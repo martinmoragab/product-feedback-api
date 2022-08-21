@@ -40,6 +40,10 @@ const feedbackSchema = new Schema({
     enum: ['Not Started', 'Planned', 'In Progress', 'Live'],
     default: 'Not Started',
   },
+	votes: {
+		type: Map,
+		default: new Map(),
+	},
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User',
