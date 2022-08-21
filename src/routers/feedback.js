@@ -13,7 +13,7 @@ router.post('/', auth, async (req, res) => {
       author: req.user._id,
     }
     const feedback = await Feedback.create(feedbackDetails);
-    res.send({ data: { feedback }});
+    res.send({ feedback });
   } catch (e) {
     res.status(500).send(e);
   }
@@ -23,19 +23,27 @@ router.post('/', auth, async (req, res) => {
 router.get('/:id', async (req, res) => {
   const feedbackId = req.params.id;
   try {
-    const feedback = await Feedback.findOne({ _id: feedbackId });
-    res.send({ data: { feedback }});
+    const feedback = await Feedback.findOne({ _id: feedbackId })
+			.populate({
+				path: 'comments',
+				populate: {
+					path: 'author',
+					model: 'User',
+					select: '-products'
+				}
+			})
+    res.send({ feedback });
   } catch (e) {
     res.status(404).send(e);
   }
 });
 
 // Get all feedbacks for a product
-router.get('/', async (req, res) => {
-  const productId = req.body.product.productId;
+router.get('/all/:id', async (req, res) => {
+  const productId = req.params.id;
   try {
     const feedbacks = await Feedback.find({ product: productId });
-    res.send({ data: { feedbacks }});
+    res.send({ feedbacks });
   } catch (e) {
     res.status(404).send(e)
   }
@@ -51,7 +59,7 @@ router.patch('/:id', auth, async (req, res) => {
     await feedback.save();
     const feedbackObject = feedback.toObject();
     delete feedbackObject.product;
-    res.send({ data: { feedbackObject }});
+    res.send({ feedbackObject });
   } catch (e) {
     res.status(500).send(e);
   }
@@ -63,7 +71,7 @@ router.delete('/:id', auth, async (req, res) => {
     const feedback = await Feedback.findById(req.params.id);
     if (feedback.author.toString() === req.user._id.toString()) {
       await feedback.remove();
-      res.send({ data: { feedback }});
+      res.send({ feedback });
     } else {
       res.status(401).send({ message: 'You are not current feedback\'s author.' });
     }
@@ -76,8 +84,9 @@ router.delete('/:id', auth, async (req, res) => {
 router.post('/:id/new-comment', auth, async (req, res) => {
   const feedbackId = req.params.id;
   const userId = req.user;
+	const commentContent = req.body.comment;
   const comment = {
-    ...req.body.comment,
+    content: commentContent,
     author: userId,
   };
   try {
@@ -86,10 +95,30 @@ router.post('/:id/new-comment', auth, async (req, res) => {
       { $push: { comments: comment }},
       { new: true }
     )
-    res.send({ data: { feedback }});
+    res.send({ feedback });
   } catch (e) {
     res.status(500).send(e);
   }
 });
+
+// Add vote to feedback
+router.patch('/:id/vote', auth, async (req, res) => {
+	const feedbackId = req.params.id;
+	const userId = req.user._id.toString();
+	try {
+		const feedback = await Feedback.findById(feedbackId);
+		const hasUserVoted = feedback.votes.has(userId);
+		// If user already votes, it will "unvote". Else, it will vote
+		if (hasUserVoted) {
+			feedback.votes.delete(userId);
+		} else {
+			feedback.votes.set(userId, 1);
+		}
+		feedback.save();
+		res.send(feedback);
+	} catch (e) {
+		res.status(500).send(e);
+	}
+})
 
 module.exports = router;
