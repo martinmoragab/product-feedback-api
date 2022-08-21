@@ -8,8 +8,8 @@ const Product = require('../models/product');
 // Get all products
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.find({}).select('name feedbacks');
-    res.send({ data: { products }});
+    const products = await Product.find({}).populate({ path: 'feedbacks', model: 'Feedback' });
+    res.send({ products });
   } catch (e) {
     res.status(500).send(e);
   }
@@ -23,7 +23,7 @@ router.post('/', auth, async (req, res) => {
       owner: req.user._id,
     };
     const product = await Product.create(productInformation);
-    res.send({ data: { product }});
+    res.send({ product });
   } catch (e) {
     res.status(500).send(e);
   }
@@ -37,7 +37,7 @@ router.patch('/:id', auth, async (req, res) => {
     if (product.owner.toString() === req.user._id.toString()) {
       updates.forEach((update) => product[update] = req.body.product[update]);
       await product.save();
-      res.send({ data: { product }});
+      res.send({ product });
     } else {
       res.status(401).send({ message: 'You require higher privileges to perform this action.' });
     }
@@ -52,7 +52,7 @@ router.delete('/:id', auth, async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (product.owner.toString() === req.user._id.toString()) {
       await product.remove();
-      res.send({ data: { product }});
+      res.send({ product });
     } else {
       res.status(401).send({ message: 'You require higher privileges to perform this action.' });
     }
