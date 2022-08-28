@@ -81,10 +81,9 @@ feedbackSchema.statics.getRoadmapCounts = async (productId) => {
 	});
 	const live = await Feedback.countDocuments({
 		product: productId,
-		status: 'Lives'
+		status: 'Live'
 	});
 	return {
-		not_started,
 		planned,
 		in_progress,
 		live

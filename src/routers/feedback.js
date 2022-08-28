@@ -43,7 +43,7 @@ router.get('/all/:id', async (req, res) => {
   const productId = req.params.id;
   try {
 		const roadmapCounts = await Feedback.getRoadmapCounts(productId);
-    const feedbacks = await Feedback.find({ product: productId });
+		const feedbacks = await Feedback.find({ product: productId });
     res.send({ feedbacks, roadmapCounts });
   } catch (e) {
     res.status(404).send(e)
