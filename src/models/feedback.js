@@ -70,6 +70,27 @@ feedbackSchema.statics.canUpdate = async (feedbackId, updates, userId) => {
   return feedback;
 }
 
+feedbackSchema.statics.getRoadmapCounts = async (productId) => {
+	const planned = await Feedback.countDocuments({
+		product: productId,
+		status: 'Planned'
+	});
+	const in_progress = await Feedback.countDocuments({
+		product: productId,
+		status: 'In Progress'
+	});
+	const live = await Feedback.countDocuments({
+		product: productId,
+		status: 'Lives'
+	});
+	return {
+		not_started,
+		planned,
+		in_progress,
+		live
+	}
+}
+
 const Feedback = mongoose.model('Feedback', feedbackSchema);
 
 module.exports = Feedback;
