@@ -40,12 +40,29 @@ router.get('/:id', async (req, res) => {
 
 // Get all feedbacks for a product
 router.get('/all/:id', async (req, res) => {
+	const category = req.query.category || undefined;
+	const status = req.query.status || undefined;
   const productId = req.params.id;
+  const sort = {};
+  if (req.query.sortBy) {
+    const parts = req.query.sortBy.split('_');
+    sort[parts[0]] = parts[1] === 'desc' ? -1 : 1;
+  }
   try {
 		const roadmapCounts = await Feedback.getRoadmapCounts(productId);
-		const feedbacks = await Feedback.find({ product: productId });
+		let feedbacks;
+		if (category) {
+			const categories = category.split(',');
+			feedbacks = await Feedback.find({ product: productId, category: { $in: categories } }).sort(sort);
+		}
+    else if (status) {
+      console.log(status)
+      feedbacks = await Feedback.find({ product: productId, status: { $in: status } }).sort(sort)
+    }
+		else feedbacks = await Feedback.find({ product: productId }).sort(sort);
     res.send({ feedbacks, roadmapCounts });
   } catch (e) {
+    console.log(e)
     res.status(404).send(e)
   }
 });
