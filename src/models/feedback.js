@@ -57,6 +57,11 @@ const feedbackSchema = new Schema({
   comments: [{
     type: commentSchema,
   }],
+  commentsLength: {
+    type: Number,
+    required: true,
+    default: 0,
+  }
 }, { timestamps: true });
 
 feedbackSchema.statics.canUpdate = async (feedbackId, updates, userId) => {
