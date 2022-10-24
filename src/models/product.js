@@ -9,6 +9,16 @@ const productSchema = new Schema({
     required: [true, 'Product\'s name is required'],
     trim: true,
   },
+  mainColor: {
+    type: String,
+    required: false,
+    default: '#AD1FEA',
+    trim: true,
+  },
+  webpage: {
+    type: String,
+    required: [true, 'Webpage is required']
+  },
   owner: {
     type: Schema.Types.ObjectId,
     required: true,

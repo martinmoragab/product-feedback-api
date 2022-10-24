@@ -15,6 +15,16 @@ router.get('/', async (req, res) => {
   }
 })
 
+router.get('/:id', async (req, res) => {
+  const productId = req.params.id;
+  try {
+    const product = await Product.findOne({ _id: productId });
+    res.send({ product });
+  } catch (e) {
+    res.status(500).send(e);
+  }
+})
+
 // Create new product
 router.post('/', auth, async (req, res) => {
   try {
