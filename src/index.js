@@ -17,6 +17,8 @@ app.use('/users', userRouter);
 app.use('/product', productRouter);
 app.use('/feedback', feedbackRouter);
 
-app.listen(port, () => {
+const listen = app.listen(port, () => {
   console.log('Server is up!');
 });
+
+const io = require('./socket').init(listen);

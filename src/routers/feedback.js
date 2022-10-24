@@ -1,5 +1,6 @@
 const express = require('express');
 const router = new express.Router();
+const io = require('../socket');
 
 const auth = require('../middleware/auth');
 
@@ -13,6 +14,8 @@ router.post('/', auth, async (req, res) => {
       author: req.user._id,
     }
     const feedback = await Feedback.create(feedbackDetails);
+    io.getIO()
+      .emit('feedbackAdded', { action: 'create', product: req.body.feedback.product });
     res.send({ feedback });
   } catch (e) {
     res.status(500).send(e);
@@ -53,14 +56,20 @@ router.get('/all/:id', async (req, res) => {
 		let feedbacks;
 		if (category) {
 			const categories = category.split(',');
-			feedbacks = await Feedback.find({ product: productId, category: { $in: categories } }).sort(sort);
+			feedbacks = await Feedback
+        .find({ product: productId, category: { $in: categories } })
+        .sort(sort)
 		}
     else if (status) {
       console.log(status)
-      feedbacks = await Feedback.find({ product: productId, status: { $in: status } }).sort(sort)
+      feedbacks = await Feedback
+        .find({ product: productId, status: { $in: status } })
+        .sort(sort)
     }
-		else feedbacks = await Feedback.find({ product: productId }).sort(sort);
-    res.send({ feedbacks, roadmapCounts });
+		else feedbacks = await Feedback
+      .find({ product: productId })
+      .sort(sort)
+    res.send({ feedbacks, roadmapCounts, totalFeedbacks: feedbacks.length });
   } catch (e) {
     console.log(e)
     res.status(404).send(e)
@@ -73,6 +82,7 @@ router.patch('/:id', auth, async (req, res) => {
   const updates = Object.keys(req.body.feedback);
   try {
     const feedback = await Feedback.canUpdate(feedbackId, updates, req.user._id);
+    console.log('feedback', feedback)
     updates.forEach((update) => feedback[update] = req.body.feedback[update]);
     await feedback.save();
     const feedbackObject = feedback.toObject();
@@ -110,9 +120,14 @@ router.post('/:id/new-comment', auth, async (req, res) => {
   try {
     const feedback = await Feedback.findByIdAndUpdate(
       { _id: feedbackId },
-      { $push: { comments: comment }},
+      {
+        $push: { comments: comment },
+        $inc: { commentsLength: 1 }
+      },
       { new: true }
     )
+    io.getIO()
+      .emit('newComment', { action: 'create', feedbackId: feedbackId });
     res.send({ feedback });
   } catch (e) {
     res.status(500).send(e);
